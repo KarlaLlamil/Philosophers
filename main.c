@@ -27,7 +27,7 @@ void	philos_routine(void *table_data)
 	
 }
 
-int	init_philo(int n, int input[5])
+int	init_philo(int n, t_input input)
 {
 	int				i;
 	pthread_t		*philos;
@@ -37,7 +37,7 @@ int	init_philo(int n, int input[5])
 	philos = malloc(input[0] * sizeof(pthread_t));
 	table = malloc(sizeof(t_philosophers));
 	table->forks = malloc(input[0] * sizeof(pthread_mutex_t));
-	table->n_philosophers = input[0];
+	table->input = input;
 	while (i < n)
 	{
 		table->index = i;
@@ -51,6 +51,20 @@ int is_digit(int c)
 	if (c >= 0 && c <= 9)
 		return (0);
 	return (1);
+}
+int		ft_atoi(char *number)
+{
+	int	i;
+	int	num;
+
+	i = 0;
+	num = 0;
+	while (number[i] != '\0')
+	{
+		num = num * 10 + number[i] - '0';
+		++i;
+	}
+	
 }
 
 bool	validate_input(int n, char **argv, t_input *input)
@@ -66,13 +80,10 @@ bool	validate_input(int n, char **argv, t_input *input)
 		{
 			if (is_digit(argv[i][j]) != 0)
 				return (false);
-			input[i - 1] = input[i - 1]*10 + argv[i][j] - '0';
 			++j;
 		}
 		++i;
 	}
-	if (n == 5)
-		input[i] = -1;
 	return (true);
 }
 
@@ -83,8 +94,16 @@ int	main(int argc, char **argv)
 	initial_conditions = (t_input){};
 	if (argc < 5 || argc > 6)
 		printf("The program needs number of philosophers time ...");
-	else if (validate_input(argc, argv, &initial_conditions) == false)
+	else if (validate_input(argc, argv) == false)
 		printf("The input needs to be an int ");
 	else
+	{
+		initial_conditions.n_philosophers = ft_atoi(argv[1]);
+		initial_conditions.time_die = ft_atoi(argv[2]);
+		initial_conditions.time_eat = ft_atoi(argv[3]);
+		initial_conditions.time_sleep = ft_atoi(argv[4]);
+		if (argc == 6)
+			initial_conditions.n_dinners = ft_atoi(argv[5]);
 		init_philo(argc - 1, initial_conditions);
+	}
 }
