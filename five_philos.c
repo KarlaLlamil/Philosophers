@@ -8,7 +8,8 @@ typedef struct s_philosophers
 {
 	int				index;
 	pthread_mutex_t	*forks;
-	pthread_mutex_t	print;
+	pthread_mutex_t	*print;
+	// deben ser punteros, es incorrecto eniar copias del mutex
 	//pthread_mutex_t read;
 
 } t_philosophers;
@@ -25,7 +26,6 @@ void	init_mutex_forks(pthread_mutex_t *fork, pthread_mutex_t *print)
 	}
 	pthread_mutex_init(print, NULL);
 	//pthread_mutex_init(&table->read, NULL);
-
 }
 
 void	destroy_mutex_forks(pthread_mutex_t *fork, pthread_mutex_t *print)
@@ -43,10 +43,10 @@ void	destroy_mutex_forks(pthread_mutex_t *fork, pthread_mutex_t *print)
 }
 void	think(t_philosophers *table)
 {
-	pthread_mutex_lock(&table->print);
+	pthread_mutex_lock(table->print);
 	printf("philosopher %i is thinking\n", table->index);
-	sleep(1);
-	pthread_mutex_unlock(&table->print);
+	//sleep(1);
+	pthread_mutex_unlock(table->print);
 
 	return ;
 }
@@ -69,7 +69,6 @@ void	get_forks(t_philosophers *table)
 	// pthread_mutex_lock(&table->print);
 	// printf("forks picked up right-> %i left->%i\n",table->index, left);
 	// pthread_mutex_unlock(&table->print);
-
 }
 
 void	put_forks(t_philosophers *table)
@@ -95,10 +94,10 @@ void	put_forks(t_philosophers *table)
 
 void	eat(t_philosophers *table)
 {
-	pthread_mutex_lock(&table->print);
+	pthread_mutex_lock(table->print);
 	printf("philosopher %i is eating\n", table->index);
-	sleep(1);
-	pthread_mutex_unlock(&table->print);
+	//sleep(1);
+	pthread_mutex_unlock(table->print);
 }
 
 void	*philos_routine(void *table)
@@ -132,7 +131,7 @@ int	main(void)
 	{
 		table[i] = malloc(sizeof(t_philosophers));
 		table[i]->forks = fork;
-		table[i]->print = print;
+		table[i]->print = &print;
 		//pthread_mutex_lock(&table->read);
 		table[i]->index = i;
 		//pthread_mutex_unlock(&table->read);
