@@ -1,0 +1,216 @@
+Initial conditions 800000.000000 200000.000000 200000.000000 
+create thread philo 0
+create thread philo 1
+create thread philo 2
+create thread philo 3
+0 0 has taken a fork
+0 0 has taken a fork
+0 0 is eating
+0 1 has taken a fork
+create thread philo 4
+0 3 has taken a fork
+0 3 has taken a fork
+0 3 is eating
+put forks philo 0
+put forks philo 3
+200 0 is sleeping
+200 3 is sleeping
+200 4 has taken a fork
+200 4 has taken a fork
+200 4 is eating
+200 1 has taken a fork
+200 1 is eating
+put forks philo 4
+400 4 is sleeping
+put forks philo 1
+400 1 is sleeping
+400 2 has taken a fork
+400 2 has taken a fork
+400 2 is eating
+402 0 is thinking
+402 0 has taken a fork
+402 0 has taken a fork
+402 0 is eating
+402 3 is thinking
+402 3 has taken a fork
+put forks philo 2
+600 2 is sleeping
+600 3 has taken a fork
+600 3 is eating
+put forks philo 0
+602 0 is sleeping
+603 4 is thinking
+603 1 is thinking
+603 1 has taken a fork
+603 1 has taken a fork
+603 1 is eating
+put forks philo 3
+800 3 is sleeping
+800 4 has taken a fork
+800 4 has taken a fork
+800 4 is eating
+put forks philo 1
+803 1 is sleeping
+803 2 is thinking
+803 2 has taken a fork
+803 2 has taken a fork
+803 2 is eating
+805 0 is thinking
+put forks philo 4
+1001 4 is sleeping
+1001 0 has taken a fork
+1001 0 has taken a fork
+1001 0 is eating
+put forks philo 2
+1003 2 is sleeping
+1004 3 is thinking
+1004 3 has taken a fork
+1004 3 has taken a fork
+1004 3 is eating
+1006 1 is thinking
+1006 1 has taken a fork
+put forks philo 0
+1201 0 is sleeping
+1201 1 has taken a fork
+1201 1 is eating
+1203 4 is thinking
+put forks philo 3
+1204 3 is sleeping
+1204 4 has taken a fork
+1204 4 has taken a fork
+1204 4 is eating
+1206 2 is thinking
+put forks philo 1
+1401 1 is sleeping
+1401 2 has taken a fork
+1401 2 has taken a fork
+1401 2 is eating
+1404 0 is thinking
+put forks philo 4
+1404 4 is sleeping
+1404 0 has taken a fork
+1404 0 has taken a fork
+1404 0 is eating
+1407 3 is thinking
+1407 3 has taken a fork
+put forks philo 2
+1601 2 is sleeping
+1601 3 has taken a fork
+1601 3 is eating
+1604 1 is thinking
+1604 1 has taken a fork
+put forks philo 0
+1604 0 is sleeping
+1604 1 has taken a fork
+1604 1 is eating
+1607 4 is thinking
+put forks philo 3
+1801 3 is sleeping
+1801 4 has taken a fork
+1801 4 has taken a fork
+1801 4 is eating
+put forks philo 1
+1805 1 is sleeping
+1805 2 is thinking
+1805 2 has taken a fork
+1805 2 has taken a fork
+1805 2 is eating
+1808 0 is thinking
+put forks philo 4
+2001 4 is sleeping
+2002 0 has taken a fork
+2002 0 has taken a fork
+2002 0 is eating
+2005 3 is thinking
+2005 3 has taken a fork
+put forks philo 2
+2005 2 is sleeping
+2005 3 has taken a fork
+2005 3 is eating
+2009 1 is thinking
+2009 1 has taken a fork
+put forks philo 0
+2202 0 is sleeping
+2202 1 has taken a fork
+2202 1 is eating
+put forks philo 3
+2205 3 is sleeping
+2206 4 is thinking
+2206 4 has taken a fork
+2206 4 has taken a fork
+2206 4 is eating
+2209 2 is thinking
+put forks philo 1
+2402 1 is sleeping
+2402 2 has taken a fork
+2402 2 has taken a fork
+2402 2 is eating
+put forks philo 4
+2406 4 is sleeping
+2407 0 is thinking
+2407 0 has taken a fork
+2407 0 has taken a fork
+2407 0 is eating
+2410 3 is thinking
+2410 3 has taken a fork
+put forks philo 2
+2602 2 is sleeping
+2602 3 has taken a fork
+2602 3 is eating
+2607 1 is thinking
+2607 1 has taken a fork
+put forks philo 0
+2607 0 is sleeping
+2607 1 has taken a fork
+2607 1 is eating
+2611 4 is thinking
+put forks philo 3
+2802 3 is sleeping
+2803 4 has taken a fork
+2803 4 has taken a fork
+2803 4 is eating
+put forks philo 1
+2807 1 is sleeping
+2807 2 is thinking
+2807 2 has taken a fork
+2807 2 has taken a fork
+2807 2 is eating
+2812 0 is thinking
+put forks philo 4
+3003 4 is sleeping
+3003 0 has taken a fork
+3003 0 has taken a fork
+3003 0 is eating
+3007 3 is thinking
+3007 3 has taken a fork
+put forks philo 2
+3007 2 is sleeping
+3007 3 has taken a fork
+3007 3 is eating
+3011 1 is thinking
+3011 1 has taken a fork
+put forks philo 0
+3203 0 is sleeping
+3203 1 has taken a fork
+3203 1 is eating
+put forks philo 3
+3208 3 is sleeping
+3208 4 is thinking
+3208 4 has taken a fork
+3208 4 has taken a fork
+3208 4 is eating
+3211 2 is thinking
+put forks philo 1
+3403 1 is sleeping
+3404 2 has taken a fork
+3404 2 has taken a fork
+3404 2 is eating
+put forks philo 4
+3408 4 is sleeping
+3409 0 is thinking
+3413 3 is thinking
+put forks philo 2
+3604 2 is sleeping
+3609 1 is thinking
+3613 4 is thinking
+3810 2 is thinking
