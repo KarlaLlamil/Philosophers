@@ -11,10 +11,11 @@
 /* ************************************************************************** */
 
 #include <stdbool.h>
+#include <stdio.h>
 
 int is_digit(int c)
 {
-	if (c >= 0 && c <= 9)
+	if (c >= '0' && c <= '9')
 		return (0);
 	return (1);
 }
@@ -30,7 +31,7 @@ int		ft_atoi(char *number)
 		num = num * 10 + number[i] - '0';
 		++i;
 	}
-	
+	return (num);
 }
 
 bool	validate_input(int n, char **argv)
@@ -39,7 +40,7 @@ bool	validate_input(int n, char **argv)
 	int	j;
 
 	i = 1;
-	while (i <= n)
+	while (i < n)
 	{
 		j = 0;
 		while (argv[i][j] != '\0')

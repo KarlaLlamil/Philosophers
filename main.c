@@ -15,29 +15,31 @@
 #include <stdlib.h>
 #include "philosophers.h"
 
-void	init_mutex_forks(pthread_mutex_t *fork, t_status *status)
+void	init_mutex_forks(int n_philo, pthread_mutex_t **fork, t_status *status)
 {
 	int	i;
 
 	i = 0;
 	status->stop_simulation = false;
-	while (i < 5)
+	while (i < n_philo)
 	{
-		pthread_mutex_init(&fork[i], NULL);
+		fork[i] = malloc(sizeof(pthread_mutex_t));
+		pthread_mutex_init(fork[i], NULL);
 		++i;
 	}
 	pthread_mutex_init(status->print, NULL);
 	pthread_mutex_init(status->stop, NULL);
 }
 
-void	destroy_mutex_forks(pthread_mutex_t *fork, t_status *status)
+void	destroy_mutex_forks(int n_philo, pthread_mutex_t **fork, t_status *status)
 {
 	int	i;
 
 	i = 0;
-	while (i < 5)
+	while (i < n_philo)
 	{
-		pthread_mutex_destroy(&fork[i]);
+		pthread_mutex_destroy(fork[i]);
+		free(fork[i]);
 		++i;
 	}
 	pthread_mutex_destroy(status->print);
@@ -49,7 +51,7 @@ void	init_philo(int n_philo, t_parameters *input)
 {
 	int				i;
 	pthread_t		*philos;
-	pthread_mutex_t	*forks;
+	pthread_mutex_t	**forks;
 	pthread_mutex_t print;
 	pthread_mutex_t stop;
 	t_philosophers	**table;
@@ -62,15 +64,15 @@ void	init_philo(int n_philo, t_parameters *input)
 	status.print = &print;
 	status.stop = &stop;
 	status.stop_simulation = false;
-	init_mutex_forks(forks, &status);
+	init_mutex_forks(n_philo, forks, &status);
 	gettimeofday(&(input->start), NULL);
 	while (i < n_philo)
 	{
 		table[i] = malloc(sizeof(t_philosophers));
 		table[i]->conditions = input;
 		table[i]->index = i;
-		table[i]->l_fork = &forks[(i + 1) % n_philo];
-		table[i]->r_fork = &forks[i];
+		table[i]->l_fork = forks[(i + 1) % n_philo];
+		table[i]->r_fork = forks[i];
 		table[i]->status = &status;
 		pthread_create(&philos[i], NULL, philos_routine, (void *)table[i]);
 		++i;
@@ -80,7 +82,7 @@ void	init_philo(int n_philo, t_parameters *input)
 		--i;
 		pthread_join(philos[i], NULL);
 	}
-	destroy_mutex_forks(forks, &status);
+	destroy_mutex_forks(n_philo, forks, &status);
 }
 
 

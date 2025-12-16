@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "philosophers.h"
+#include <stdio.h>
 
 void	print_status(t_philosophers *philo, e_philo_status state)
 {

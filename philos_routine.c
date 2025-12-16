@@ -118,7 +118,7 @@ void	*philos_routine(void *philo)
 	int				n_meals;
 	
 	last_meal = ((t_philosophers *)philo)->conditions->start;
-	while(read_stop_simulation(((t_philosophers *)philo)->status))
+	while(!read_stop_simulation(((t_philosophers *)philo)->status))
 	{
 		get_forks((t_philosophers *)philo);
 		eat (&last_meal, &n_meals, (t_philosophers*)philo);
