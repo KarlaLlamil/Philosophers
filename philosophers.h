@@ -16,18 +16,22 @@ typedef enum e_philo_status
 
 typedef	struct s_parameters
 {
+	int				n_philos;
 	double			time_die;
 	double			time_eat;
 	double			time_sleep;
 	int				n_dinners;
-	struct timeval	start;
 }	t_parameters;
 
 typedef struct s_status
 {
 	bool			stop_simulation;
-	pthread_mutex_t	*print;
-	pthread_mutex_t	*stop;
+	int				*forks_used;
+	int				starving_p;
+	struct timeval	*t_last_meal;
+	pthread_mutex_t	*mutx_last_meal;
+	pthread_mutex_t	print;
+	pthread_mutex_t	stop;
 
 } t_status;
 
@@ -40,7 +44,8 @@ typedef struct s_philosophers
 	pthread_mutex_t *r_fork;
 } t_philosophers;
 
-void	*philos_routine(void *philos);
+void	*philos_routine(void *philosopher);
+void *monitorig_routine(void *status);
 bool	validate_input(int n, char **argv);
 bool	read_stop_simulation(t_status *status);
 void	write_stop_simulation(t_philosophers *philo);

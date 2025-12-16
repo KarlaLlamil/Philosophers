@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 16:04:56 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/16 16:33:26 by karlarod         ###   ########.fr       */
+/*   Updated: 2025/12/16 17:58:02 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,21 @@
 #include <stdlib.h>
 #include "philosophers.h"
 
-void	init_mutex_forks(int n_philo, pthread_mutex_t *fork, t_status *status)
+pthread_mutex_t	*make_mutex_forks(int n_philo)
 {
-	int	i;
+	int				i;
+	pthread_mutex_t	*fork;
 
 	i = 0;
-	status->stop_simulation = false;
+	fork = malloc(n_philo * sizeof(pthread_mutex_t ));
+	if (fork == NULL)
+		return (NULL);
 	while (i < n_philo)
 	{
 		pthread_mutex_init(&fork[i], NULL);
 		++i;
 	}
-	pthread_mutex_init(status->print, NULL);
-	pthread_mutex_init(status->stop, NULL);
+	return (fork);
 }
 
 void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork, t_status *status)
@@ -38,6 +40,7 @@ void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork, t_status *status)
 	while (i < n_philo)
 	{
 		pthread_mutex_destroy(&fork[i]);
+		pthread_mutex_destoy(&status->forks_used[i], NULL);
 		++i;
 	}
 	pthread_mutex_destroy(status->print);
@@ -47,11 +50,78 @@ void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork, t_status *status)
 	free(status->stop);
 	//pthread_mutex_destroy(&table->read);
 }
+void	*destroy_status(t_status *statua, int n_philo)
+{
+	int				i;
+	
+	i = 0;
+	pthread_mutex_init(status->print, NULL);
+	pthread_mutex_init(status->stop, NULL);
+	while (i < n_philo)
+	{
+		pthread_mutex_destroy(&status->forks_used[i]);
+		++i;
+	}
+	free(status->print);
+	free(status->stop);
+	free(status->forks_used); 
+	free(status->t_last_meal);
+	free(status->mutx_last_meal);
+	free(status);
+}
+
+handle_mutex_init_fail(status->forks_used, i)
+
+int		init_status(t_status *status, int n_philo)
+{
+	struct timeval	start;
+	int				i;
+	
+	i = 0;
+	status->starving_p = 0;
+	status->stop_simulation = false;
+	gettimeofday(&start, NULL);
+	while (i < n_philo)
+	{
+		status->forks_used[i] = -1;
+		status->t_last_meal[i] = start;
+		if (pthread_mutex_init(&status->forks_used[i], NULL) != 0)
+			return (handle_mutex_init_fail(status->forks_used, i);
+		++i;
+	}
+	if (pthread_mutex_init(&status->print, NULL) != 0)
+		return (1);
+	if (pthread_mutex_init(&status->stop, NULL) != 0)
+		return(1);
+	return (0);
+}
+
+
+t_status	*make_status(int n_philo)
+{
+	t_status		*status;
+
+	status = malloc(sizeof(t_status));
+	if (status == NULL)
+		return (NULL);
+	status->forks_used = malloc(n_philo * (sizeof(int)));
+	if (status->forks_used == NULL)
+		return (free(status), NULL);
+	status->t_last_meal = malloc(n_philo * (sizeof(struct timeval)));
+	if (status->t_last_meal == NULL)
+		return (free(status->forks_used), free(status), NULL);
+	status->mutx_last_meal = malloc(n_philo * (sizeof(pthread_mutex_t)));
+	if (status->mutx_last_meal == NULL)
+		return (free(status->t_last_meal) ,free(status->forks_used), free(status),NULL);
+	if (init_status(status, n_philo) !
+	return (status);
+}
 
 void	init_philo(int n_philo, t_parameters *input)
 {
 	int				i;
 	pthread_t		*philos;
+	pthread_t		monitor_id;
 	pthread_mutex_t	*forks;
 	t_philosophers	*table;
 	t_status		*status;
@@ -60,20 +130,8 @@ void	init_philo(int n_philo, t_parameters *input)
 	i = 0;
 	philos = malloc(n_philo * sizeof(pthread_t ));
 	table = malloc(n_philo * sizeof(t_philosophers ));
-	forks = malloc(n_philo * sizeof(pthread_mutex_t ));
-	status = malloc(sizeof(t_status));
-	status->print = malloc(sizeof(pthread_mutex_t));
-	status->stop = malloc(sizeof(pthread_mutex_t));
-	status->stop_simulation = false;
-	//status->forks_used = malloc(n_philo * (sizeof(int)));
-	// while (i < n_philo)
-	// {
-	// 	status->forks_used[i] = -1;
-	// 	++i;
-	// }
-	// i = 0;
-	init_mutex_forks(n_philo, forks, status);
-	gettimeofday(&(input->start), NULL);
+	
+	status = init_status(n_philo, forks);
 	while (i < n_philo)
 	{
 		table[i].conditions = input;

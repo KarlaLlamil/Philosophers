@@ -129,13 +129,13 @@ void	f_sleep(struct timeval *last_meal, t_philosophers *philo)
 	}
 }
 
-void	*philos_routine(void *philo)
+void	*philos_routine(void *philosopher)
 {
-	struct timeval	last_meal;
 	int				n_meals;
+	
 	// bool			have_forks;
 	
-	last_meal = ((t_philosophers *)philo)->conditions->start;
+
 	//printf("start thread philo %i\n", ((t_philosophers *)philo)->index);
 	while(!read_stop_simulation(((t_philosophers *)philo)->status))
 	{
