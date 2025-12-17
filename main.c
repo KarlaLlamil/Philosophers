@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 16:04:56 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/17 15:17:05 by karlarod         ###   ########.fr       */
+/*   Updated: 2025/12/17 18:48:34 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,14 +53,14 @@ void	*destroy_status(t_status *status, int n_philo, int type)
 	
 	i = 0;
 	if (status == NULL)
-		return ;
+		return(NULL) ;
 	if (type == 1)
 	{
 		pthread_mutex_destroy(&status->print);
 		pthread_mutex_destroy(&status->stop);
 		while (i < n_philo)
 		{
-			pthread_mutex_destroy(&status->forks_used[i]);
+			pthread_mutex_destroy(&status->mutx_last_meal[i]);
 			++i;
 		}
 	}
@@ -98,12 +98,13 @@ int		init_status(t_status *status, int n_philo)
 	status->starving_p = 0;
 	status->stop_simulation = false;
 	gettimeofday(&start, NULL);
+	status->start = start;
 	while (i < n_philo)
 	{
 		status->forks_used[i] = -1;
 		status->t_last_meal[i] = start;
-		if (pthread_mutex_init(&status->forks_used[i], NULL) != 0)
-			return (handle_mutex_init_fail(status->forks_used, i));
+		if (pthread_mutex_init(&status->mutx_last_meal[i], NULL) != 0)
+			return (handle_mutex_init_fail(status->mutx_last_meal, i));
 		++i;
 	}
 	if (pthread_mutex_init(&status->print, NULL) != 0)
@@ -155,8 +156,8 @@ t_philosophers	*make_table(t_parameters *input, pthread_mutex_t **forks)
 	{
 		table[i].conditions = input;
 		table[i].index = i;
-		table[i].l_fork = &forks[(i + 1) % input->n_philos];
-		table[i].r_fork = &forks[i];
+		table[i].l_fork = forks[(i + 1) % input->n_philos];
+		table[i].r_fork = forks[i];
 		table[i].status = status;
 		++i;
 	}
@@ -198,14 +199,14 @@ void	init_philo(t_parameters *input)
 		//printf("create thread philo %i\n", i);
 		if (pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]) != 0)
 		{
-   			printf("pthread_create failed at %d, ret=%d\n", i);
+   			printf("pthread_create failed at %d\n", i);
     		return;
 		}
 		++i;
 	}
-	exit_simulation(n_philo, philos, &monitor_id);
-	destroy_status(table[0].status, n_philo, 0);
-	destroy_mutex_forks(n_philo, forks);
+	exit_simulation(monitor.conditions->n_philos, philos, &monitor_id);
+	destroy_status(table[0].status, monitor.conditions->n_philos, 0);
+	destroy_mutex_forks(monitor.conditions->n_philos, forks);
 	free(table);
 }
 
@@ -213,7 +214,6 @@ void	init_philo(t_parameters *input)
 int	main(int argc, char **argv)
 {
 	t_parameters	initial_conditions;
-	int				n_philo;
 	
 	initial_conditions = (t_parameters){};
 	if (argc < 5 || argc > 6)

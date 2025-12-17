@@ -28,6 +28,7 @@ typedef struct s_status
 	bool			stop_simulation;
 	int				*forks_used;
 	int				starving_p;
+	struct timeval	start;
 	struct timeval	*t_last_meal;
 	pthread_mutex_t	*mutx_last_meal;
 	pthread_mutex_t	print;
@@ -54,8 +55,8 @@ void	*philos_routine(void *philosopher);
 void *monitorig_routine(void *status);
 bool	validate_input(int n, char **argv);
 bool	read_stop_simulation(t_status *status);
-void	write_stop_simulation(t_philosophers *philo);
-void	print_status(t_philosophers *philo, e_philo_status state);
+void	write_stop_simulation(int n, t_status *status);
+void	print_status(int n, t_status *status, e_philo_status state);
 int		ft_atoi(char *number);
 
 #endif

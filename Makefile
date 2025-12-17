@@ -1,5 +1,5 @@
 NAME := philo
-SRC_FILES := main.c philos_routine.c readd_write_stop.c validate_input.c
+SRC_FILES := main.c philos_routine.c readd_write_stop.c validate_input.c monitor.c
 
 OBJ_FILES := $(SRC_FILES:%.c=%.o)
 HEADERS := philosophers.h
