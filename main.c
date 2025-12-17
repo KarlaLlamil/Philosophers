@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 16:04:56 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/16 17:58:02 by karlarod         ###   ########.fr       */
+/*   Updated: 2025/12/17 13:27:30 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,45 +32,62 @@ pthread_mutex_t	*make_mutex_forks(int n_philo)
 	return (fork);
 }
 
-void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork, t_status *status)
+void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork)
 {
 	int	i;
 
 	i = 0;
+	if (fork == NULL)
+		return ;
 	while (i < n_philo)
 	{
 		pthread_mutex_destroy(&fork[i]);
-		pthread_mutex_destoy(&status->forks_used[i], NULL);
 		++i;
 	}
-	pthread_mutex_destroy(status->print);
-	pthread_mutex_destroy(status->stop);
 	free(fork);
-	free(status->print);
-	free(status->stop);
 	//pthread_mutex_destroy(&table->read);
 }
-void	*destroy_status(t_status *statua, int n_philo)
+void	*destroy_status(t_status *status, int n_philo, int type)
 {
 	int				i;
 	
 	i = 0;
-	pthread_mutex_init(status->print, NULL);
-	pthread_mutex_init(status->stop, NULL);
-	while (i < n_philo)
+	if (status == NULL)
+		return ;
+	if (type == 1)
 	{
-		pthread_mutex_destroy(&status->forks_used[i]);
-		++i;
+		pthread_mutex_destroy(&status->print);
+		pthread_mutex_destroy(&status->stop);
+		while (i < n_philo)
+		{
+			pthread_mutex_destroy(&status->forks_used[i]);
+			++i;
+		}
 	}
-	free(status->print);
-	free(status->stop);
 	free(status->forks_used); 
 	free(status->t_last_meal);
 	free(status->mutx_last_meal);
 	free(status);
+	return (NULL);
 }
 
-handle_mutex_init_fail(status->forks_used, i)
+int	handle_mutex_init_fail(pthread_mutex_t *mtx, int n)
+{
+	int	i;
+
+	i = 0;
+	if (n == 0)
+		pthread_mutex_destroy(mtx);
+	else
+	{
+		while(i < n)
+		{
+			pthread_mutex_destroy(&mtx[i]);
+			++i;
+		}
+	}
+	return (1);
+}
 
 int		init_status(t_status *status, int n_philo)
 {
@@ -86,13 +103,13 @@ int		init_status(t_status *status, int n_philo)
 		status->forks_used[i] = -1;
 		status->t_last_meal[i] = start;
 		if (pthread_mutex_init(&status->forks_used[i], NULL) != 0)
-			return (handle_mutex_init_fail(status->forks_used, i);
+			return (handle_mutex_init_fail(status->forks_used, i));
 		++i;
 	}
 	if (pthread_mutex_init(&status->print, NULL) != 0)
-		return (1);
+		return (handle_mutex_init_fail(&status->print, 0));
 	if (pthread_mutex_init(&status->stop, NULL) != 0)
-		return(1);
+		return(handle_mutex_init_fail(&status->stop, 0));
 	return (0);
 }
 
@@ -113,25 +130,27 @@ t_status	*make_status(int n_philo)
 	status->mutx_last_meal = malloc(n_philo * (sizeof(pthread_mutex_t)));
 	if (status->mutx_last_meal == NULL)
 		return (free(status->t_last_meal) ,free(status->forks_used), free(status),NULL);
-	if (init_status(status, n_philo) !
+	if (init_status(status, n_philo) == 1)
+		return (destroy_status(status, n_philo, 1));
 	return (status);
 }
 
-void	init_philo(int n_philo, t_parameters *input)
+t_philosophers	*make_table(int n_philo, t_parameters *input, pthread_mutex_t **forks)
 {
 	int				i;
-	pthread_t		*philos;
-	pthread_t		monitor_id;
-	pthread_mutex_t	*forks;
-	t_philosophers	*table;
 	t_status		*status;
-	int				ret;
+	t_philosophers	*table;
 
 	i = 0;
-	philos = malloc(n_philo * sizeof(pthread_t ));
-	table = malloc(n_philo * sizeof(t_philosophers ));
-	
-	status = init_status(n_philo, forks);
+	status = make_status(n_philo);
+	*forks = make_mutex_forks(n_philo);
+	table = malloc(n_philo * sizeof(t_philosophers));
+	if (table == NULL || *forks = NULL || status == NULL)
+	{
+		destroy_status(status, n_philo, 0);
+		destroy_mutex_forks(n_philo, *forks);
+		return (NULL);
+	}
 	while (i < n_philo)
 	{
 		table[i].conditions = input;
@@ -139,24 +158,49 @@ void	init_philo(int n_philo, t_parameters *input)
 		table[i].l_fork = &forks[(i + 1) % n_philo];
 		table[i].r_fork = &forks[i];
 		table[i].status = status;
-		//printf("create thread philo %i\n", i);
-		ret = pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]);
-		if (ret != 0)
-		{
-   			 //printf("pthread_create failed at %d, ret=%d\n", i, ret);
-    		return;
-		}
 		++i;
 	}
+	return (table);
+}
+
+void	exit_simulation(int n, pthread_t *philos)
+{
+	int	i;
+
+	i = n;
 	while (i > 0)
 	{
 		--i;
 		pthread_join(philos[i], NULL);
 	}
 	free(philos);
-	destroy_mutex_forks(n_philo, forks, status);
-	//free(status->forks_used);
-	free(status);
+}
+
+void	init_philo(int n_philo, t_parameters *input)
+{
+	int				i;
+	pthread_t		*philos;
+	pthread_t		monitor_id;
+	t_philosophers	*table;
+	pthread_mutex_t	*forks;
+
+	i = 0;
+	forks = NULL;
+	philos = malloc(n_philo * sizeof(pthread_t ));
+	table = make_table(n_philo, input, &forks);
+	while (i < n_philo)
+	{
+		//printf("create thread philo %i\n", i);
+		if (pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]) != 0)
+		{
+   			printf("pthread_create failed at %d, ret=%d\n", i);
+    		return;
+		}
+		++i;
+	}
+	exit_simulation(n_philo, philos);
+	destroy_status(table[0 ]->status, n_philo, 0);
+	destroy_mutex_forks(n_philo, forks);
 	free(table);
 }
 
