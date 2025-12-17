@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 16:04:56 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/17 13:27:30 by karlarod         ###   ########.fr       */
+/*   Updated: 2025/12/17 15:17:05 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,27 +135,27 @@ t_status	*make_status(int n_philo)
 	return (status);
 }
 
-t_philosophers	*make_table(int n_philo, t_parameters *input, pthread_mutex_t **forks)
+t_philosophers	*make_table(t_parameters *input, pthread_mutex_t **forks)
 {
 	int				i;
 	t_status		*status;
 	t_philosophers	*table;
 
 	i = 0;
-	status = make_status(n_philo);
-	*forks = make_mutex_forks(n_philo);
-	table = malloc(n_philo * sizeof(t_philosophers));
-	if (table == NULL || *forks = NULL || status == NULL)
+	status = make_status(input->n_philos);
+	*forks = make_mutex_forks(input->n_philos);
+	table = malloc(input->n_philos * sizeof(t_philosophers));
+	if (table == NULL || *forks == NULL || status == NULL)
 	{
-		destroy_status(status, n_philo, 0);
-		destroy_mutex_forks(n_philo, *forks);
+		destroy_status(status, input->n_philos, 0);
+		destroy_mutex_forks(input->n_philos, *forks);
 		return (NULL);
 	}
-	while (i < n_philo)
+	while (i < input->n_philos)
 	{
 		table[i].conditions = input;
 		table[i].index = i;
-		table[i].l_fork = &forks[(i + 1) % n_philo];
+		table[i].l_fork = &forks[(i + 1) % input->n_philos];
 		table[i].r_fork = &forks[i];
 		table[i].status = status;
 		++i;
@@ -163,7 +163,7 @@ t_philosophers	*make_table(int n_philo, t_parameters *input, pthread_mutex_t **f
 	return (table);
 }
 
-void	exit_simulation(int n, pthread_t *philos)
+void	exit_simulation(int n, pthread_t *philos, pthread_t *monitor_id)
 {
 	int	i;
 
@@ -173,22 +173,27 @@ void	exit_simulation(int n, pthread_t *philos)
 		--i;
 		pthread_join(philos[i], NULL);
 	}
+	pthread_join(*monitor_id, NULL);
 	free(philos);
 }
 
-void	init_philo(int n_philo, t_parameters *input)
+void	init_philo(t_parameters *input)
 {
 	int				i;
 	pthread_t		*philos;
 	pthread_t		monitor_id;
+	t_monitor		monitor;
 	t_philosophers	*table;
 	pthread_mutex_t	*forks;
 
 	i = 0;
 	forks = NULL;
-	philos = malloc(n_philo * sizeof(pthread_t ));
-	table = make_table(n_philo, input, &forks);
-	while (i < n_philo)
+	philos = malloc(input->n_philos * sizeof(pthread_t ));
+	table = make_table(input, &forks);
+	monitor.status = table[0].status;
+	monitor.conditions = input;
+	pthread_create(&monitor_id, NULL, monitorig_routine, (void *)&monitor);
+	while (i < input->n_philos)
 	{
 		//printf("create thread philo %i\n", i);
 		if (pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]) != 0)
@@ -198,8 +203,8 @@ void	init_philo(int n_philo, t_parameters *input)
 		}
 		++i;
 	}
-	exit_simulation(n_philo, philos);
-	destroy_status(table[0 ]->status, n_philo, 0);
+	exit_simulation(n_philo, philos, &monitor_id);
+	destroy_status(table[0].status, n_philo, 0);
 	destroy_mutex_forks(n_philo, forks);
 	free(table);
 }
@@ -217,7 +222,7 @@ int	main(int argc, char **argv)
 		printf("The input needs to be an int ");
 	else
 	{
-		n_philo = ft_atoi(argv[1]);
+		initial_conditions.n_philos = ft_atoi(argv[1]);
 		initial_conditions.time_die = ft_atoi(argv[2]) * 1000;
 		initial_conditions.time_eat = ft_atoi(argv[3]) * 1000;
 		initial_conditions.time_sleep = ft_atoi(argv[4]) * 1000;
@@ -226,7 +231,7 @@ int	main(int argc, char **argv)
 			initial_conditions.n_dinners = ft_atoi(argv[5]);
 		else
 			initial_conditions.n_dinners = -1;
-		init_philo(n_philo, &initial_conditions);
+		init_philo(&initial_conditions);
 	}
 	return (0);
 }

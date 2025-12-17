@@ -44,6 +44,12 @@ typedef struct s_philosophers
 	pthread_mutex_t *r_fork;
 } t_philosophers;
 
+typedef struct s_monitor
+{
+	t_parameters	*conditions;
+	t_status		*status;
+} t_monitor;
+
 void	*philos_routine(void *philosopher);
 void *monitorig_routine(void *status);
 bool	validate_input(int n, char **argv);

@@ -6,22 +6,21 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 18:28:50 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/16 15:25:54 by karlarod         ###   ########.fr       */
+/*   Updated: 2025/12/17 16:03:58 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 #include <stdio.h>
 
-void	print_status(t_philosophers *philo, e_philo_status state)
+void	print_status(int n, t_status *status, e_philo_status state)
 {
 	struct timeval	current;
 	double			time_elapsed;
 	struct timeval  reference;
 	int				time_stamp;
 	
-	if (philo->status->stop_simulation)
-		return ;
+
 	reference = philo->conditions->start;
 	pthread_mutex_lock(philo->status->print);
 	gettimeofday(&current, NULL);
@@ -51,11 +50,11 @@ bool	read_stop_simulation(t_status *status)
 	return (value);
 }
 
-void	write_stop_simulation(t_philosophers *philo)
+void	write_stop_simulation(int n, t_status *status)
 {
-	pthread_mutex_lock(philo->status->stop);
-	print_status(philo, DEAD);
-	philo->status->stop_simulation = true;
-	pthread_mutex_unlock(philo->status->stop);
+	pthread_mutex_lock(&status->stop);
+	print_status(n, status, DEAD);
+	status->stop_simulation = true;
+	pthread_mutex_unlock(&status->stop);
 }
 
