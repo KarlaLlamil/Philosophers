@@ -29,7 +29,7 @@ void *monitorig_routine(void *args)
 	{
 		usleep(5000);
 		i = 0;
-		while (!read_stop_simulation(monitor->status) && i < monitor->conditions->n_philos)
+		while (i < monitor->conditions->n_philos)
 		{
 			//printf("in the loop\n");
 			gettimeofday(&current, NULL);
@@ -38,7 +38,10 @@ void *monitorig_routine(void *args)
 			time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->t_last_meal[i].tv_usec));
 			//printf("time elapsed %f\n", time_elapsed);
 			if (time_elapsed >= monitor->conditions->time_die)
+			{
 				write_stop_simulation(i, monitor->status);
+				break;
+			}
 			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
 			++i;
 		}
