@@ -31,12 +31,17 @@ int	get_forks(t_philosophers *philo)
 	{
 		pthread_mutex_lock(philo->r_fork);
 		philo->status->forks_used[philo->index] = philo->index;
-		if (read_stop_simulation(philo->status) || philo->l_fork == philo->r_fork)
+		printf("philosopher %i take fork %i\n", philo->index, philo->index);
+		if (read_stop_simulation(philo->status))
 			return (1);
 		print_status(philo->index, philo->status, FORK);
+		if (philo->l_fork == philo->r_fork)
+			return(1);
 		//philo->status->forks_used[philo->index] = philo->index;
 		pthread_mutex_lock(philo->l_fork);
 		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
+		printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
+
 		if (read_stop_simulation(philo->status))
 			return (2);
 		print_status(philo->index, philo->status, FORK);
@@ -46,11 +51,15 @@ int	get_forks(t_philosophers *philo)
 	{
 		pthread_mutex_lock(philo->l_fork);
 		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
-		if (read_stop_simulation(philo->status) || philo->l_fork == philo->r_fork)
+		printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
+		if (read_stop_simulation(philo->status) )
 			return (1);
 		print_status(philo->index, philo->status, FORK);
+		if (philo->l_fork == philo->r_fork)
+			return(1);
 		pthread_mutex_lock(philo->r_fork);
 		philo->status->forks_used[philo->index] = philo->index;
+		printf("philosopher %i take fork %i\n", philo->index, philo->index);
 		if (read_stop_simulation(philo->status))
 			return (2);
 		print_status(philo->index, philo->status, FORK);
@@ -71,10 +80,10 @@ void	put_forks(int n_mut, t_philosophers *philo)
 		if (n_mut == 2)
 			pthread_mutex_unlock(philo->l_fork);
 	}
-	else if (n_mut != 2)
+	else if (n_mut != 0)
 	{
 		pthread_mutex_unlock(philo->l_fork);
-		if (n_mut != 2)
+		if (n_mut == 2)
 			pthread_mutex_unlock(philo->r_fork);
 	}
 }
@@ -199,7 +208,8 @@ void	*philos_routine(void *philo)
 	int				n_mtx;
 	// bool			have_forks;
 
-	//printf("start thread philo %i\n", ((t_philosophers *)philo)->index);
+	//printf("start thread philo %i \n", ((t_philosophers *)philo)->index);
+	n_meals = 0;
 	while(!read_stop_simulation(((t_philosophers *)philo)->status))
 	{
 		if (((t_philosophers *)philo)->conditions->n_dinners >= 0 && n_meals == ((t_philosophers *)philo)->conditions->n_dinners)

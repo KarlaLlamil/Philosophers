@@ -20,7 +20,7 @@ void	print_status(int n, t_status *status, e_philo_status state)
 	struct timeval  reference;
 	int				time_stamp;
 	
-	n = n + 1;
+	// ++n;
 	reference = status->start;
 	pthread_mutex_lock(&status->print);
 	gettimeofday(&current, NULL);

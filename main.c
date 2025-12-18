@@ -103,6 +103,7 @@ int		init_status(t_status *status, int n_philo)
 	{
 		status->forks_used[i] = -1;
 		status->t_last_meal[i] = start;
+		printf("time start sec %ld micro %ld\n", status->t_last_meal[i].tv_sec, status->t_last_meal[i].tv_usec );
 		if (pthread_mutex_init(&status->mutx_last_meal[i], NULL) != 0)
 			return (handle_mutex_init_fail(status->mutx_last_meal, i));
 		++i;
@@ -136,7 +137,7 @@ t_status	*make_status(int n_philo)
 	return (status);
 }
 
-t_philosophers	*make_table(t_parameters *input, pthread_mutex_t **forks)
+t_philosophers	*make_table(t_parameters *input, pthread_mutex_t *forks)
 {
 	int				i;
 	t_status		*status;
@@ -144,20 +145,20 @@ t_philosophers	*make_table(t_parameters *input, pthread_mutex_t **forks)
 
 	i = 0;
 	status = make_status(input->n_philos);
-	*forks = make_mutex_forks(input->n_philos);
 	table = malloc(input->n_philos * sizeof(t_philosophers));
-	if (table == NULL || *forks == NULL || status == NULL)
+	if (table == NULL || forks == NULL || status == NULL)
 	{
 		destroy_status(status, input->n_philos, 0);
-		destroy_mutex_forks(input->n_philos, *forks);
+		destroy_mutex_forks(input->n_philos, forks);
 		return (NULL);
 	}
 	while (i < input->n_philos)
 	{
 		table[i].conditions = input;
 		table[i].index = i;
-		table[i].l_fork = forks[(i + 1) % input->n_philos];
-		table[i].r_fork = forks[i];
+		table[i].l_fork = &forks[(i + 1) % input->n_philos];
+		table[i].r_fork = &forks[i];
+		//printf("left fork = %p right fork = %p\n", table->l_fork)
 		table[i].status = status;
 		++i;
 	}
@@ -188,9 +189,9 @@ void	init_philo(t_parameters *input)
 	pthread_mutex_t	*forks;
 
 	i = 0;
-	forks = NULL;
+	forks = make_mutex_forks(input->n_philos);;
 	philos = malloc(input->n_philos * sizeof(pthread_t ));
-	table = make_table(input, &forks);
+	table = make_table(input, forks);
 	monitor.status = table[0].status;
 	monitor.conditions = input;
 	pthread_create(&monitor_id, NULL, monitorig_routine, (void *)&monitor);
