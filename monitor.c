@@ -19,6 +19,7 @@ void *monitorig_routine(void *args)
 {
 	struct timeval current;
 	double			time_elapsed;
+//	struct timeval	last;
 	//double			timer;
 	int				i;
 	t_monitor		*monitor;
@@ -36,13 +37,14 @@ void *monitorig_routine(void *args)
 			pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
 			time_elapsed = (current.tv_sec - monitor->status->t_last_meal[i].tv_sec) * 1e6;
 			time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->t_last_meal[i].tv_usec));
+			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
 			//printf("time elapsed %f\n", time_elapsed);
-			if (time_elapsed >= monitor->conditions->time_die)
+			if (time_elapsed > monitor->conditions->time_die)
 			{
 				write_stop_simulation(i, monitor->status);
-				break;
+				return (NULL);
+				//break;
 			}
-			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
 			++i;
 		}
 	}

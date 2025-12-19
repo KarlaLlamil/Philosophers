@@ -31,37 +31,36 @@ int	get_forks(t_philosophers *philo)
 	{
 		pthread_mutex_lock(philo->r_fork);
 		philo->status->forks_used[philo->index] = philo->index;
-		printf("philosopher %i take fork %i\n", philo->index, philo->index);
-		if (read_stop_simulation(philo->status))
-			return (1);
+		// printf("philosopher %i take fork %i\n", philo->index, philo->index);
+		//if (read_stop_simulation(philo->status))
+		//	return (1);
 		print_status(philo->index, philo->status, FORK);
 		if (philo->l_fork == philo->r_fork)
 			return(1);
 		//philo->status->forks_used[philo->index] = philo->index;
 		pthread_mutex_lock(philo->l_fork);
 		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
-		printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
-
-		if (read_stop_simulation(philo->status))
-			return (2);
-		print_status(philo->index, philo->status, FORK);
+		//printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
+		//if (read_stop_simulation(philo->status))
+		//	return (2);
+		//print_status(philo->index, philo->status, FORK);
 		//philo->status->forks_used[(philo->index + 1) % n_philo] = philo->index;
 	}
 	else
 	{
 		pthread_mutex_lock(philo->l_fork);
 		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
-		printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
-		if (read_stop_simulation(philo->status) )
-			return (1);
-		print_status(philo->index, philo->status, FORK);
-		if (philo->l_fork == philo->r_fork)
-			return(1);
+		//printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
+		//if (read_stop_simulation(philo->status) )
+		//	return (1);
+		//print_status(philo->index, philo->status, FORK);
+		//if (philo->l_fork == philo->r_fork)
+		//	return(1);
 		pthread_mutex_lock(philo->r_fork);
 		philo->status->forks_used[philo->index] = philo->index;
-		printf("philosopher %i take fork %i\n", philo->index, philo->index);
-		if (read_stop_simulation(philo->status))
-			return (2);
+		//printf("philosopher %i take fork %i\n", philo->index, philo->index);
+		//if (read_stop_simulation(philo->status))
+		//	return (2);
 		print_status(philo->index, philo->status, FORK);
 		//philo->status->forks_used[philo->index] = philo->index;
 	}
@@ -105,19 +104,19 @@ void	eat( int  *n_meals, t_philosophers *philo)
 		return ;
 	gettimeofday(&current, NULL);
 	pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
+	philo->status->t_last_meal[philo->index] = current;
+	pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
 	time_elapsed = (current.tv_sec - philo->status->t_last_meal[philo->index].tv_sec) * 1e6;
 	time_elapsed = (time_elapsed + (current.tv_usec - philo->status->t_last_meal[philo->index].tv_usec)) ;
-	pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
-	if (time_elapsed >= philo->conditions->time_die)
+	if (time_elapsed > philo->conditions->time_die)
 	{
 		write_stop_simulation(philo->index, philo->status);
 		return ;
 	}
 	//print_status(philo->index, philo->status, EAT);
 	//usleep(philo->conditions->time_eat);
-	pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
-	philo->status->t_last_meal[philo->index] = current;
-	pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
+	//pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
+	//pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
 	print_status(philo->index, philo->status, EAT);
 	while (time_eating < philo->conditions->time_eat && !read_stop_simulation(philo->status))
 	{
