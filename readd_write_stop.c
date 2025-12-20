@@ -26,7 +26,7 @@ void	print_status(int n, t_status *status, e_philo_status state)
 	time_elapsed = (current.tv_sec - reference.tv_sec) * 1e6;
 	time_elapsed = (time_elapsed + (current.tv_usec - reference.tv_usec));
 	time_stamp = (time_elapsed / 1000);
-	//pthread_mutex_lock(&status->print);
+	// pthread_mutex_lock(&status->print);
 	if (state == FORK && !read_stop_simulation(status))
 		printf("%i %i has taken a fork\n",time_stamp, n);
 	else if (state == EAT)
@@ -37,7 +37,7 @@ void	print_status(int n, t_status *status, e_philo_status state)
 		printf("%i %i is thinking\n",time_stamp, n);
 	else if (state == DEAD)
 		printf("%i %i died\n",time_stamp, n);
-	//pthread_mutex_unlock(&status->print);
+	// pthread_mutex_unlock(&status->print);
 }
 
 bool	read_stop_simulation(t_status *status)

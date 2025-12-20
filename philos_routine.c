@@ -25,8 +25,8 @@ void	think(t_philosophers *philo)
 int	get_forks(t_philosophers *philo)
 {
 	//printf("get forks philo %i\n", ((t_philosophers *)philo)->index);
-	if (read_stop_simulation(philo->status))
-		return (0) ;
+	// if (read_stop_simulation(philo->status))
+	// 	return (0) ;
 	if (philo->index%2 == 0)
 	{
 		pthread_mutex_lock(philo->r_fork);
@@ -70,27 +70,27 @@ int	get_forks(t_philosophers *philo)
 	// pthread_mutex_unlock(&philo->print);
 }
 
-void	put_forks(int n_mut, t_philosophers *philo)
+void	put_forks( t_philosophers *philo)
 {
 	//printf("put forks philo %i\n", ((t_philosophers *)philo)->index);
-	if (philo->index%2 == 0 && n_mut != 0)
-	{
-		pthread_mutex_unlock(philo->r_fork);
-		if (n_mut == 2)
-			pthread_mutex_unlock(philo->l_fork);
-	}
-	else if (n_mut != 0)
-	{
-		pthread_mutex_unlock(philo->l_fork);
-		if (n_mut == 2)
-			pthread_mutex_unlock(philo->r_fork);
-	}
+	// if (philo->index%2 == 0 && n_mut != 0)
+	// {
+	pthread_mutex_unlock(philo->r_fork);
+	//if (n_mut == 2)
+	pthread_mutex_unlock(philo->l_fork);
+	// }
+	// else if (n_mut != 0)
+	// {
+	// 	pthread_mutex_unlock(philo->l_fork);
+	// 	if (n_mut == 2)
+	// 		pthread_mutex_unlock(philo->r_fork);
+	// }
 }
 
 void	eat( int  *n_meals, t_philosophers *philo)
 {
 	struct timeval current;
-	double			time_elapsed;
+	//double			time_elapsed;
 	double			time_eating;
 	double			timer;
 	// bool			first;
@@ -100,24 +100,25 @@ void	eat( int  *n_meals, t_philosophers *philo)
 	if (philo->conditions->time_eat <  8000)
 		timer = philo->conditions->time_eat;
 	// first = true;
-	if (read_stop_simulation(philo->status))
-		return ;
+	// if (read_stop_simulation(philo->status))
+	// 	return ;
+	//pthread_mutex_lock(&philo->status->stop);
 	gettimeofday(&current, NULL);
-	pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
+	//pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
 	philo->status->t_last_meal[philo->index] = current;
-	pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
-	time_elapsed = (current.tv_sec - philo->status->t_last_meal[philo->index].tv_sec) * 1e6;
-	time_elapsed = (time_elapsed + (current.tv_usec - philo->status->t_last_meal[philo->index].tv_usec)) ;
-	if (time_elapsed > philo->conditions->time_die)
-	{
-		write_stop_simulation(philo->index, philo->status);
-		return ;
-	}
-	//print_status(philo->index, philo->status, EAT);
+	//pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
+	// time_elapsed = (current.tv_sec - philo->status->t_last_meal[philo->index].tv_sec) * 1e6;
+	// time_elapsed = (time_elapsed + (current.tv_usec - philo->status->t_last_meal[philo->index].tv_usec)) ;
+	// if (time_elapsed > philo->conditions->time_die)
+	// {
+	// 	write_stop_simulation(philo->index, philo->status);
+	// 	return ;
+	// }
+	print_status(philo->index, philo->status, EAT);
 	//usleep(philo->conditions->time_eat);
 	//pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
 	//pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
-	print_status(philo->index, philo->status, EAT);
+	//pthread_mutex_unlock(&philo->status->stop);
 	while (time_eating < philo->conditions->time_eat && !read_stop_simulation(philo->status))
 	{
 		//printf("time that has been sleeping %f\n", time_sleeping);
@@ -139,10 +140,11 @@ void	eat( int  *n_meals, t_philosophers *philo)
 		if (time_eating + timer > philo->conditions->time_sleep)
 			timer = philo->conditions->time_sleep - time_eating;
 	}
+	//print_status(philo->index, philo->status, EAT);
 	gettimeofday(&current, NULL);
-	pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
+	//pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
 	philo->status->t_last_meal[philo->index] = current;
-	pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
+	//pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
 
 	//printf("eat philo %i\n", ((t_philosophers *)philo)->index);
 	// if (read_stop_simulation(philo->status))
@@ -204,7 +206,7 @@ void	f_sleep( t_philosophers *philo)
 void	*philos_routine(void *philo)
 {
 	int				n_meals;
-	int				n_mtx;
+	//int				n_mtx;
 	// bool			have_forks;
 
 	//printf("start thread philo %i \n", ((t_philosophers *)philo)->index);
@@ -214,10 +216,10 @@ void	*philos_routine(void *philo)
 		if (((t_philosophers *)philo)->conditions->n_dinners >= 0 && n_meals == ((t_philosophers *)philo)->conditions->n_dinners)
 			return (NULL);
 		// Revisar si considerar que tome un tenedor
-		n_mtx = get_forks((t_philosophers *)philo);
-		if (n_mtx == 2)
-			eat (&n_meals, (t_philosophers*)philo);
-		put_forks (n_mtx, (t_philosophers*)philo);
+		get_forks((t_philosophers *)philo);
+		//if (n_mtx == 2)
+		eat (&n_meals, (t_philosophers*)philo);
+		put_forks ( (t_philosophers*)philo);
 		f_sleep ( (t_philosophers *)philo);
 		think ( (t_philosophers *)philo);
 	}

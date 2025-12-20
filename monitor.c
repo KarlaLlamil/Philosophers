@@ -19,7 +19,8 @@ void *monitorig_routine(void *args)
 {
 	struct timeval current;
 	double			time_elapsed;
-//	struct timeval	last;
+	struct timeval	last;
+	double			time_stamp;
 	//double			timer;
 	int				i;
 	t_monitor		*monitor;
@@ -30,14 +31,21 @@ void *monitorig_routine(void *args)
 	{
 		usleep(5000);
 		i = 0;
+		gettimeofday(&current, NULL);
+		time_elapsed = (current.tv_sec - monitor->status->start.tv_sec) * 1e6;
+		time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->start.tv_usec));
+		time_stamp = (time_elapsed / 1000);
+		printf ("%f\n",time_stamp);
 		while (i < monitor->conditions->n_philos)
 		{
 			//printf("in the loop\n");
 			gettimeofday(&current, NULL);
-			pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
-			time_elapsed = (current.tv_sec - monitor->status->t_last_meal[i].tv_sec) * 1e6;
-			time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->t_last_meal[i].tv_usec));
-			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
+			//pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
+			last = monitor->status->t_last_meal[i];
+			//pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
+
+			time_elapsed = (current.tv_sec - last.tv_sec) * 1e6;
+			time_elapsed = (time_elapsed + (current.tv_usec - last.tv_usec));
 			//printf("time elapsed %f\n", time_elapsed);
 			if (time_elapsed > monitor->conditions->time_die)
 			{
@@ -47,6 +55,12 @@ void *monitorig_routine(void *args)
 			}
 			++i;
 		}
+		gettimeofday(&current, NULL);
+		time_elapsed = (current.tv_sec - monitor->status->start.tv_sec) * 1e6;
+		time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->start.tv_usec));
+		time_stamp = (time_elapsed / 1000);
+		printf ("%f\n",time_stamp);
+
 	}
 	return (NULL);
 }
