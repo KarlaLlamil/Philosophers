@@ -20,13 +20,11 @@ void	print_status(int n, t_status *status, e_philo_status state)
 	struct timeval  reference;
 	int				time_stamp;
 	
-	// ++n;
 	reference = status->start;
 	gettimeofday(&current, NULL);
 	time_elapsed = (current.tv_sec - reference.tv_sec) * 1e6;
 	time_elapsed = (time_elapsed + (current.tv_usec - reference.tv_usec));
 	time_stamp = (time_elapsed / 1000);
-	// pthread_mutex_lock(&status->print);
 	if (state == FORK && !read_stop_simulation(status))
 		printf("%i %i has taken a fork\n",time_stamp, n);
 	else if (state == EAT)
