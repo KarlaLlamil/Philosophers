@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 15:23:27 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 15:30:21 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/07 17:52:00 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,35 +32,22 @@ void *monitorig_routine(void *args)
 		usleep(5000);
 		i = 0;
 		gettimeofday(&current, NULL);
-		// time_elapsed = (current.tv_sec - monitor->status->start.tv_sec) * 1e6;
-		// time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->start.tv_usec));
-		// time_stamp = (time_elapsed / 1000);
-		//printf ("%f\n",time_stamp);
 		while (i < monitor->conditions->n_philos)
 		{
-			//printf("in the loop\n");
 			gettimeofday(&current, NULL);
-			//pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
+			pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
 			last = monitor->status->t_last_meal[i];
-			//pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
-
+			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
 			time_elapsed = (current.tv_sec - last.tv_sec) * 1e6;
 			time_elapsed = (time_elapsed + (current.tv_usec - last.tv_usec));
-			//printf("time elapsed %f\n", time_elapsed);
 			if (time_elapsed > monitor->conditions->time_die)
 			{
+				printf("time elapsed %f\n", time_elapsed);
 				write_stop_simulation(i, monitor->status);
 				return (NULL);
-				//break;
 			}
 			++i;
 		}
-		// gettimeofday(&current, NULL);
-		// time_elapsed = (current.tv_sec - monitor->status->start.tv_sec) * 1e6;
-		// time_elapsed = (time_elapsed + (current.tv_usec - monitor->status->start.tv_usec));
-		// time_stamp = (time_elapsed / 1000);
-		//printf ("%f\n",time_stamp);
-
 	}
 	return (NULL);
 }
