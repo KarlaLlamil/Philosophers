@@ -5,63 +5,60 @@
 
 void	think(t_philosophers *philo)
 {
-	// struct timeval current;
-	// double			time_elapsed;
 
-	//printf("think philo %i\n", ((t_philosophers *)philo)->index);
 	if (read_stop_simulation(philo->status))
 		return ;
-	// gettimeofday(&current, NULL);
-	// time_elapsed = (current.tv_sec - last_meal->tv_sec) * 1e6;
-	// time_elapsed = (time_elapsed + (current.tv_usec - last_meal->tv_usec));
-	// if (time_elapsed > philo->conditions->time_die)
-	// {
-	// 	write_stop_simulation(philo->index, philo->status);
-	// 	return ;
-	// }
 	print_status(philo->index, philo->status, THINK);
 }
 
 int	get_forks(t_philosophers *philo)
 {
-	//printf("get forks philo %i\n", ((t_philosophers *)philo)->index);
-	// if (read_stop_simulation(philo->status))
-	// 	return (0) ;
+	if (read_stop_simulation(philo->status))
+		return (0) ;
+	while (philo->conditions->n_philos%2 ==  1 && (philo->status->forks_used[philo->index] == philo->index || philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] == philo->index))
+	{
+		usleep(5000);
+	}
 	if (philo->index < (philo->index + 1) % philo->conditions->n_philos)
 	{
+
 		pthread_mutex_lock(philo->r_fork);
+		philo->status->forks_used[philo->index] = philo->index;
 		//philo->status->forks_used[philo->index] = philo->index;
 		// printf("philosopher %i take fork %i\n", philo->index, philo->index);
 		//if (read_stop_simulation(philo->status))
 		//	return (1);
-		print_status(philo->index, philo->status, FORK);
-		if (philo->l_fork == philo->r_fork)
-			return(1);
+		print_status(philo->index, philo->status, FORK_R);
+	
 		//philo->status->forks_used[philo->index] = philo->index;
 		pthread_mutex_lock(philo->l_fork);
-		//philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
+		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
 		//printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
 		//if (read_stop_simulation(philo->status))
 		//	return (2);
-		//print_status(philo->index, philo->status, FORK);
+		print_status(philo->index, philo->status, FORK_L);
 		//philo->status->forks_used[(philo->index + 1) % n_philo] = philo->index;
 	}
 	else
 	{
+		// while (philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] == philo->index)
+		// {
+		// 	usleep(5000);
+		// }
 		pthread_mutex_lock(philo->l_fork);
-		//philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
+		philo->status->forks_used[(philo->index + 1) % philo->conditions->n_philos] = philo->index;
 		//printf("philosopher %i take fork %i\n", philo->index, (philo->index + 1) % philo->conditions->n_philos);
 		//if (read_stop_simulation(philo->status) )
 		//	return (1);
-		//print_status(philo->index, philo->status, FORK);
+		print_status(philo->index, philo->status, FORK_L);
 		//if (philo->l_fork == philo->r_fork)
 		//	return(1);
 		pthread_mutex_lock(philo->r_fork);
-		//philo->status->forks_used[philo->index] = philo->index;
+		philo->status->forks_used[philo->index] = philo->index;
 		//printf("philosopher %i take fork %i\n", philo->index, philo->index);
 		//if (read_stop_simulation(philo->status))
 		//	return (2);
-		print_status(philo->index, philo->status, FORK);
+		print_status(philo->index, philo->status, FORK_R);
 		//philo->status->forks_used[philo->index] = philo->index;
 	}
 	return (2);
@@ -91,7 +88,6 @@ void	eat( int  *n_meals, t_philosophers *philo)
 {
 	struct timeval current;
 	double			time_elapsed;
-	double			timer;
 	struct timeval	start_eating;
 
 	if (read_stop_simulation(philo->status))
@@ -106,102 +102,57 @@ void	eat( int  *n_meals, t_philosophers *philo)
 		gettimeofday(&current, NULL);
 		time_elapsed = (current.tv_sec - start_eating.tv_sec) * 1e6;
 		time_elapsed = (time_elapsed + (current.tv_usec - start_eating.tv_usec));
-		// //printf ("time elapsed %f \n", time_elapsed);
-		if (time_elapsed > philo->conditions->time_die)
-			break;		
-		// {
-		// 	//printf("philo %i die while sleeping\n", philo->index);
-		// 	write_stop_simulation(philo->index, philo->status);
-		// 	return ;
-		// }
-		// if (first == true)
-		// 	print_status(philo->index, philo->status, EAT);
-		// first = false;
-		//usleep(timer);
-	// 	time_eating = time_eating + timer;
-	// 	if (time_eating + timer > philo->conditions->time_sleep)
-	// 		timer = philo->conditions->time_sleep - time_eating;
-	// }
-	//print_status(philo->index, philo->status, EAT);
-	//gettimeofday(&current, NULL);
-	//pthread_mutex_lock(&philo->status->mutx_last_meal[philo->index]);
-	//philo->status->t_last_meal[philo->index] = current;
-	//pthread_mutex_unlock(&philo->status->mutx_last_meal[philo->index]);
-
-	//printf("eat philo %i\n", ((t_philosophers *)philo)->index);
-	// if (read_stop_simulation(philo->status))
-	// 	return ;
-	// gettimeofday(&current, NULL);
-	// time_elapsed = (current.tv_sec - last_meal->tv_sec) * 1e6;
-	// time_elapsed = (time_elapsed + (current.tv_usec - last_meal->tv_usec)) ;
-	// if (time_elapsed > philo->conditions->time_die)
-	// {
-	// 	write_stop_simulation(philo->index, philo->status);
-	// 	return ;
-	// }
-	// print_status(philo->index, philo->status, EAT);
-	// usleep(philo->conditions->time_eat);
-	
-	// gettimeofday(last_meal, NULL);
-	//if (time_eating >= philo->conditions->time_eat)
+		if (time_elapsed > philo->conditions->time_eat)
+			break;
+		if ((time_elapsed + 5000) > philo->conditions->time_eat)
+			usleep(philo->conditions->time_eat - time_elapsed);
+		else
+			usleep(5000);			
+	}
 	++(*n_meals);
 }
 
 void	f_sleep( t_philosophers *philo)
 {
-	//struct timeval current;
-	//double			time_elapsed;
-	double			time_sleeping;
-	double			timer;
-	bool			first;
+	struct timeval	start_sleeping;
+	double			time_elapsed;
+	struct timeval	current;
 
-	time_sleeping = 0;
-	timer = 8000;
-	if (philo->conditions->time_sleep <  8000)
-		timer = philo->conditions->time_sleep;
-	first = true;
-	// if (read_stop_simulation(philo->status))
-	// 	return ;
-	while (time_sleeping < philo->conditions->time_sleep && !read_stop_simulation(philo->status))
+	if (read_stop_simulation(philo->status))
+		return ;
+	print_status(philo->index, philo->status, SLEEP);
+	gettimeofday(&start_sleeping, NULL);
+	while (!read_stop_simulation(philo->status))
 	{
-		//printf("time that has been sleeping %f\n", time_sleeping);
-		// gettimeofday(&current, NULL);
-		// time_elapsed = (current.tv_sec - last_meal->tv_sec) * 1e6;
-		// time_elapsed = (time_elapsed + (current.tv_usec - last_meal->tv_usec));
-		// //printf ("time elapsed %f \n", time_elapsed);
-		// if (time_elapsed > philo->conditions->time_die)
-		// {
-		// 	//printf("philo %i die while sleeping\n", philo->index);
-		// 	write_stop_simulation(philo->index, philo->status);
-		// 	return ;
-		// }
-		if (first == true)
-			print_status(philo->index, philo->status, SLEEP);
-		first = false;
-		usleep(timer);
-		time_sleeping = time_sleeping + timer;
-		if (time_sleeping + timer > philo->conditions->time_sleep)
-			timer = philo->conditions->time_sleep - time_sleeping;
+		gettimeofday(&current, NULL);
+		time_elapsed = (current.tv_sec - start_sleeping.tv_sec) * 1e6;
+		time_elapsed = (time_elapsed + (current.tv_usec - start_sleeping.tv_usec));
+		if (time_elapsed >= philo->conditions->time_sleep)
+			return ;
+		if ((time_elapsed + 5000) > philo->conditions->time_sleep)
+			usleep(philo->conditions->time_sleep - time_elapsed);
+		else
+			usleep(5000);
 	}
 }
 
 void	*philos_routine(void *philo)
 {
 	int				n_meals;
-	//int				n_mtx;
-	// bool			have_forks;
 
-	//printf("start thread philo %i \n", ((t_philosophers *)philo)->index);
 	n_meals = 0;
 	while(!read_stop_simulation(((t_philosophers *)philo)->status))
 	{
 		if (((t_philosophers *)philo)->conditions->n_dinners >= 0 && n_meals == ((t_philosophers *)philo)->conditions->n_dinners)
 			return (NULL);
 		// Revisar si considerar que tome un tenedor
-		get_forks((t_philosophers *)philo);
+		if (((t_philosophers *)philo)->l_fork != ((t_philosophers *)philo)->r_fork)
+		{
+			get_forks((t_philosophers *)philo);
 		//if (n_mtx == 2)
-		eat (&n_meals, (t_philosophers*)philo);
-		put_forks ( (t_philosophers*)philo);
+			eat (&n_meals, (t_philosophers*)philo);
+			put_forks ( (t_philosophers*)philo);
+		}
 		f_sleep ( (t_philosophers *)philo);
 		think ( (t_philosophers *)philo);
 	}

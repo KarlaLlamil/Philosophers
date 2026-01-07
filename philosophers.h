@@ -7,7 +7,8 @@
 
 typedef enum e_philo_status
 {
-	FORK,
+	FORK_L,
+	FORK_R,
 	EAT,
 	SLEEP,
 	THINK,

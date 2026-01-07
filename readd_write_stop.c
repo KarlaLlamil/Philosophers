@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 18:28:50 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/17 19:14:00 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/07 17:16:37 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,15 @@ void	print_status(int n, t_status *status, e_philo_status state)
 	time_elapsed = (current.tv_sec - reference.tv_sec) * 1e6;
 	time_elapsed = (time_elapsed + (current.tv_usec - reference.tv_usec));
 	time_stamp = (time_elapsed / 1000);
-	if (state == FORK && !read_stop_simulation(status))
-		printf("%i %i has taken a fork\n",time_stamp, n);
-	else if (state == EAT)
+	if (state == FORK_L && !read_stop_simulation(status))
+		printf("%i %i has taken a fork %i\n",time_stamp, n, (n + 1) % 200);
+	else if (state == FORK_R && !read_stop_simulation(status))
+		printf("%i %i has taken a fork %i\n",time_stamp, n, n);
+	else if (state == EAT && !read_stop_simulation(status))
 		printf("%i %i is eating\n",time_stamp, n);
-	else if (state == SLEEP)
+	else if (state == SLEEP && !read_stop_simulation(status))
 		printf("%i %i is sleeping\n",time_stamp, n);
-	else if (state == THINK)
+	else if (state == THINK && !read_stop_simulation(status))
 		printf("%i %i is thinking\n",time_stamp, n);
 	else if (state == DEAD)
 		printf("%i %i died\n",time_stamp, n);

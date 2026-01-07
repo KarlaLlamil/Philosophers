@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 15:23:27 by karlarod          #+#    #+#             */
-/*   Updated: 2025/12/17 19:11:31 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/07 15:30:21 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void *monitorig_routine(void *args)
 			if (time_elapsed > monitor->conditions->time_die)
 			{
 				write_stop_simulation(i, monitor->status);
-				//return (NULL);
+				return (NULL);
 				//break;
 			}
 			++i;
