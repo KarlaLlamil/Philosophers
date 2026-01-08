@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 17:29:28 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 17:29:29 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 14:58:24 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 
 # include <pthread.h>
 # include <stdbool.h>
-#include <sys/time.h>
+# include <sys/time.h>
+# define PHILO_MAX 200
 
 typedef enum e_philo_status
 {
@@ -68,5 +69,6 @@ bool	validate_input(int n, char **argv, t_parameters *input);
 bool	read_stop_simulation(t_status *status);
 void	write_stop_simulation(int n, t_status *status);
 void	print_status(int n, t_status *status, e_philo_status state);
+
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 18:28:50 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 17:16:37 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:08:02 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ void	print_status(int n, t_status *status, e_philo_status state)
 	int				time_stamp;
 	
 	reference = status->start;
-	++n;
 	pthread_mutex_lock(&status->print);
 	gettimeofday(&current, NULL);
 	time_elapsed = (current.tv_sec - reference.tv_sec) * 1e6;

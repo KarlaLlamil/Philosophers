@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/17 15:23:27 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 17:52:00 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:00:39 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ bool	finish_dinner(t_monitor *monitor)
 	return (true);
 }
 
-long int	calculate_time_elapsed(t_monitor *monitor, int i)
+double	calculate_time_elapsed(t_monitor *monitor, int i)
 {
 	struct timeval current;
 	long int		time_elapsed;

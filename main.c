@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 16:04:56 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 16:22:58 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:02:14 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ void	destroy_mutex_forks(int n_philo, pthread_mutex_t *fork)
 		++i;
 	}
 	free(fork);
-	//pthread_mutex_destroy(&table->read);
 }
 void	*destroy_status(t_status *status, int n_philo, int type)
 {
@@ -156,9 +155,12 @@ t_philosophers	*make_table(t_parameters *input, pthread_mutex_t *forks)
 	{
 		table[i].param = input;
 		table[i].i = i;
-		table[i].l_fork = &forks[(i + 1) % input->n_philo];
-		table[i].r_fork = &forks[i];
 		table[i].status = status;
+		table[i].r_fork = &forks[i];
+		if ( (i + 1) == input->n_philo)
+			table[i].l_fork = &forks[0];
+		else
+			table[i].l_fork = &forks[(i + 1)];
 		++i;
 	}
 	return (table);
@@ -175,35 +177,43 @@ void	exit_simulation(int n, pthread_t *philos, pthread_t *monitor_id)
 		pthread_join(philos[i], NULL);
 	}
 	pthread_join(*monitor_id, NULL);
-	free(philos);
 }
 
-void	init_philo(t_parameters *input)
+void	init_threads(t_philosophers *table, t_monitor *monitor)
 {
 	int				i;
-	pthread_t		*philos;
+	pthread_t		philos[PHILO_MAX];
 	pthread_t		monitor_id;
-	t_monitor		monitor;
-	t_philosophers	*table;
-	pthread_mutex_t	*forks;
-
+	
 	i = 0;
-	forks = make_mutex_forks(input->n_philo);;
-	philos = malloc(input->n_philo * sizeof(pthread_t ));
-	table = make_table(input, forks);
-	monitor.status = table[0].status;
-	monitor.param = input;
-	pthread_create(&monitor_id, NULL, monitorig_routine, (void *)&monitor);
-	while (i < input->n_philo)
+	pthread_create(&monitor_id, NULL, monitorig_routine, (void *)monitor);
+	while (i < monitor->param->n_philo)
 	{
 		if (pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]) != 0)
 		{
-   			printf("pthread_create failed at %d\n", i);
-    		break;
+   			printf("Pthread_create failed at %d\n", i);
+    		break ;
 		}
 		++i;
 	}
-	exit_simulation(monitor.param->n_philo, philos, &monitor_id);
+	exit_simulation(i, philos, &monitor_id);
+}
+
+void	init_simulation(t_parameters *input)
+{
+	t_monitor		monitor;
+	t_philosophers	*table;
+	pthread_mutex_t	*forks;
+	
+	forks = make_mutex_forks(input->n_philo);
+	if (forks == NULL)
+		return ;
+	table = make_table(input, forks);
+	if (table == NULL)
+		return ;
+	monitor.status = table[0].status;
+	monitor.param = input;
+	init_threads(table, &monitor);
 	destroy_status(table[0].status, monitor.param->n_philo, 0);
 	destroy_mutex_forks(monitor.param->n_philo, forks);
 	free(table);
@@ -226,11 +236,9 @@ int	main(int argc, char **argv)
 	{
 		valid = validate_input(argc, argv, &input);
 		if (valid)
-		{
-			init_philo(&input);
-		}
+			init_simulation(&input);
 		else
-			printf("Invalid input, the program only accept integers\n");
+			printf("Invalid input, the program only accept positive integers and a maximum of 200 Philosophers\n");
 	}
 	return (0);
 }

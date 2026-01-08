@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/07 17:29:19 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 17:29:20 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:03:29 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,21 @@
 
 void	think(t_philosophers *philo)
 {
-	if (read_stop_simulation(philo->status))
-		return ;
 	print_status(philo->i, philo->status, THINK);
 }
 
 void	get_forks(t_philosophers *philo)
 {
+	int left;
+
+	left = philo->i + 1;
+	if ((philo->i + 1) == philo->param->n_philo)
+		left = 0;
 	if (read_stop_simulation(philo->status))
 		return ;
-	while (philo->param->n_philo % 2 ==  1 && (philo->status->forks[philo->i] == philo->i || philo->status->forks[(philo->i + 1) % philo->param->n_philo] == philo->i))
-		usleep(5000);
-	if (philo->i < (philo->i + 1) % philo->param->n_philo)
+	// while (philo->param->n_philo % 2 ==  1 && (philo->status->forks[philo->i] == philo->i || philo->status->forks[left] == philo->i))
+	// 	usleep(5000);
+	if ((philo->i + 1) != philo->param->n_philo)
 	{
 		pthread_mutex_lock(philo->r_fork);
 		philo->status->forks[philo->i] = philo->i;
@@ -113,12 +116,9 @@ void	*philos_routine(void *philosopher)
 	philo = (t_philosophers *)philosopher;
 	while(!read_stop_simulation(philo->status))
 	{
-		if (philo->l_fork != philo->r_fork)
-		{
-			get_forks(philo);
-			eat (philo);
-			put_forks (philo);
-		}
+		get_forks(philo);
+		eat (philo);
+		put_forks (philo);
 		f_sleep (philo);
 		think (philo);
 	}
