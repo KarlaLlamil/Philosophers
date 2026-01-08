@@ -64,7 +64,7 @@ void	*destroy_status(t_status *status, int n_philo, int type)
 			++i;
 		}
 	}
-	free(status->forks_used); 
+	free(status->forks); 
 	free(status->t_last_meal);
 	free(status->mutx_last_meal);
 	free(status);
@@ -95,15 +95,14 @@ int		init_status(t_status *status, int n_philo)
 	int				i;
 	
 	i = 0;
-	status->starving_p = 0;
 	status->stop_simulation = false;
 	gettimeofday(&start, NULL);
 	status->start = start;
 	while (i < n_philo)
 	{
-		status->forks_used[i] = -1;
+		status->forks[i] = -1;
 		status->t_last_meal[i] = start;
-		printf("time start sec %ld micro %ld\n", status->t_last_meal[i].tv_sec, status->t_last_meal[i].tv_usec );
+		status->n_meals[i] = 0;
 		if (pthread_mutex_init(&status->mutx_last_meal[i], NULL) != 0)
 			return (handle_mutex_init_fail(status->mutx_last_meal, i));
 		++i;
@@ -123,15 +122,16 @@ t_status	*make_status(int n_philo)
 	status = malloc(sizeof(t_status));
 	if (status == NULL)
 		return (NULL);
-	status->forks_used = malloc(n_philo * (sizeof(int)));
-	if (status->forks_used == NULL)
+	status->forks = malloc(n_philo * (sizeof(int)));
+	if (status->forks == NULL)
 		return (free(status), NULL);
 	status->t_last_meal = malloc(n_philo * (sizeof(struct timeval)));
 	if (status->t_last_meal == NULL)
-		return (free(status->forks_used), free(status), NULL);
+		return (free(status->forks), free(status), NULL);
 	status->mutx_last_meal = malloc(n_philo * (sizeof(pthread_mutex_t)));
 	if (status->mutx_last_meal == NULL)
-		return (free(status->t_last_meal) ,free(status->forks_used), free(status),NULL);
+		return (free(status->t_last_meal) ,free(status->forks), free(status),NULL);
+	status->n_meals = malloc(n_philo * sizeof(int));
 	if (init_status(status, n_philo) == 1)
 		return (destroy_status(status, n_philo, 1));
 	return (status);
@@ -144,21 +144,20 @@ t_philosophers	*make_table(t_parameters *input, pthread_mutex_t *forks)
 	t_philosophers	*table;
 
 	i = 0;
-	status = make_status(input->n_philos);
-	table = malloc(input->n_philos * sizeof(t_philosophers));
+	status = make_status(input->n_philo);
+	table = malloc(input->n_philo * sizeof(t_philosophers));
 	if (table == NULL || forks == NULL || status == NULL)
 	{
-		destroy_status(status, input->n_philos, 0);
-		destroy_mutex_forks(input->n_philos, forks);
+		destroy_status(status, input->n_philo, 0);
+		destroy_mutex_forks(input->n_philo, forks);
 		return (NULL);
 	}
-	while (i < input->n_philos)
+	while (i < input->n_philo)
 	{
-		table[i].conditions = input;
-		table[i].index = i;
-		table[i].l_fork = &forks[(i + 1) % input->n_philos];
+		table[i].param = input;
+		table[i].i = i;
+		table[i].l_fork = &forks[(i + 1) % input->n_philo];
 		table[i].r_fork = &forks[i];
-		//printf("left fork = %p right fork = %p\n", table->l_fork)
 		table[i].status = status;
 		++i;
 	}
@@ -189,50 +188,49 @@ void	init_philo(t_parameters *input)
 	pthread_mutex_t	*forks;
 
 	i = 0;
-	forks = make_mutex_forks(input->n_philos);;
-	philos = malloc(input->n_philos * sizeof(pthread_t ));
+	forks = make_mutex_forks(input->n_philo);;
+	philos = malloc(input->n_philo * sizeof(pthread_t ));
 	table = make_table(input, forks);
 	monitor.status = table[0].status;
-	monitor.conditions = input;
+	monitor.param = input;
 	pthread_create(&monitor_id, NULL, monitorig_routine, (void *)&monitor);
-	while (i < input->n_philos)
+	while (i < input->n_philo)
 	{
-		//printf("create thread philo %i\n", i);
 		if (pthread_create(&philos[i], NULL, philos_routine, (void *)&table[i]) != 0)
 		{
    			printf("pthread_create failed at %d\n", i);
-    		return;
+    		break;
 		}
 		++i;
 	}
-	exit_simulation(monitor.conditions->n_philos, philos, &monitor_id);
-	destroy_status(table[0].status, monitor.conditions->n_philos, 0);
-	destroy_mutex_forks(monitor.conditions->n_philos, forks);
+	exit_simulation(monitor.param->n_philo, philos, &monitor_id);
+	destroy_status(table[0].status, monitor.param->n_philo, 0);
+	destroy_mutex_forks(monitor.param->n_philo, forks);
 	free(table);
 }
 
 
 int	main(int argc, char **argv)
 {
-	t_parameters	initial_conditions;
+	t_parameters	input;
+	bool			valid;
 	
-	initial_conditions = (t_parameters){};
+	input = (t_parameters){};
 	if (argc < 5 || argc > 6)
-		printf("The program needs number of philosophers time ...");
-	else if (validate_input(argc, argv) == false)
-		printf("The input needs to be an int ");
+	{
+		printf("The program needs:\n1.Number of philosophers\n2.Time to die\n");
+		printf("3.Time to eat\n4.Time to sleep\n");
+		printf("5.Number of times each philosopher should eat(optional)\n");
+	}
 	else
 	{
-		initial_conditions.n_philos = ft_atoi(argv[1]);
-		initial_conditions.time_die = ft_atoi(argv[2]) * 1000;
-		initial_conditions.time_eat = ft_atoi(argv[3]) * 1000;
-		initial_conditions.time_sleep = ft_atoi(argv[4]) * 1000;
-		printf("Initial conditions %f %f %f \n", initial_conditions.time_die, initial_conditions.time_eat, initial_conditions.time_sleep );
-		if (argc == 6)
-			initial_conditions.n_dinners = ft_atoi(argv[5]);
+		valid = validate_input(argc, argv, &input);
+		if (valid)
+		{
+			init_philo(&input);
+		}
 		else
-			initial_conditions.n_dinners = -1;
-		init_philo(&initial_conditions);
+			printf("Invalid input, the program only accept integers\n");
 	}
 	return (0);
 }

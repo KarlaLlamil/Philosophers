@@ -15,13 +15,37 @@
 #include <unistd.h>
 #include <stdio.h>
 
-void *monitorig_routine(void *args)
+bool	finish_dinner(t_monitor *monitor)
+{
+	int	i;
+
+	i = 0;
+	while (i < monitor->param->n_philo)
+	{
+		if (monitor->status->n_meals[i] < monitor->param->n_dinners)
+			return (false);
+		++i;
+	}
+	return (true);
+}
+
+long int	calculate_time_elapsed(t_monitor *monitor, int i)
 {
 	struct timeval current;
-	double			time_elapsed;
+	long int		time_elapsed;
 	struct timeval	last;
-	//double			time_stamp;
-	//double			timer;
+	
+	gettimeofday(&current, NULL);
+	pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
+	last = monitor->status->t_last_meal[i];
+	pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
+	time_elapsed = (current.tv_sec - last.tv_sec) * 1e6;
+	time_elapsed = (time_elapsed + (current.tv_usec - last.tv_usec));
+	return (time_elapsed);
+}
+
+void *monitorig_routine(void *args)
+{
 	int				i;
 	t_monitor		*monitor;
 
@@ -29,20 +53,17 @@ void *monitorig_routine(void *args)
 	monitor = (t_monitor *)args;
 	while (!read_stop_simulation(monitor->status))
 	{
+		if (monitor->param->n_dinners != -1 && finish_dinner(monitor))
+		{
+			write_stop_simulation(-1, monitor->status);
+			return (NULL);
+		}	
 		usleep(5000);
 		i = 0;
-		gettimeofday(&current, NULL);
-		while (i < monitor->conditions->n_philos)
+		while (i < monitor->param->n_philo)
 		{
-			gettimeofday(&current, NULL);
-			pthread_mutex_lock(&monitor->status->mutx_last_meal[i]);
-			last = monitor->status->t_last_meal[i];
-			pthread_mutex_unlock(&monitor->status->mutx_last_meal[i]);
-			time_elapsed = (current.tv_sec - last.tv_sec) * 1e6;
-			time_elapsed = (time_elapsed + (current.tv_usec - last.tv_usec));
-			if (time_elapsed > monitor->conditions->time_die)
+			if (calculate_time_elapsed(monitor, i) > monitor->param->time_die)
 			{
-				printf("time elapsed %f\n", time_elapsed);
 				write_stop_simulation(i, monitor->status);
 				return (NULL);
 			}
