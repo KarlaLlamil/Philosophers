@@ -6,7 +6,7 @@
 /*   By: karlarod <karlarod@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 18:28:50 by karlarod          #+#    #+#             */
-/*   Updated: 2026/01/07 17:16:37 by karlarod         ###   ########.fr       */
+/*   Updated: 2026/01/08 16:55:22 by karlarod         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,27 +17,26 @@ void	print_status(int n, t_status *status, e_philo_status state)
 {
 	struct timeval	current;
 	double			time_elapsed;
-	struct timeval  reference;
+	struct timeval	reference;
 	int				time_stamp;
-	
+
 	reference = status->start;
+	pthread_mutex_lock(&status->print);
 	gettimeofday(&current, NULL);
 	time_elapsed = (current.tv_sec - reference.tv_sec) * 1e6;
 	time_elapsed = (time_elapsed + (current.tv_usec - reference.tv_usec));
 	time_stamp = (time_elapsed / 1000);
-	if (state == FORK_L && !read_stop_simulation(status))
-		printf("%i %i has taken a fork %i\n",time_stamp, n, (n + 1) % 200);
-	else if (state == FORK_R && !read_stop_simulation(status))
-		printf("%i %i has taken a fork %i\n",time_stamp, n, n);
+	if (state == FORK && !read_stop_simulation(status))
+		printf("%i %i has taken a fork \n", time_stamp, n + 1);
 	else if (state == EAT && !read_stop_simulation(status))
-		printf("%i %i is eating\n",time_stamp, n);
+		printf("%i %i is eating\n", time_stamp, n + 1);
 	else if (state == SLEEP && !read_stop_simulation(status))
-		printf("%i %i is sleeping\n",time_stamp, n);
+		printf("%i %i is sleeping\n", time_stamp, n + 1);
 	else if (state == THINK && !read_stop_simulation(status))
-		printf("%i %i is thinking\n",time_stamp, n);
+		printf("%i %i is thinking\n", time_stamp, n + 1);
 	else if (state == DEAD)
-		printf("%i %i died\n",time_stamp, n);
-	// pthread_mutex_unlock(&status->print);
+		printf("%i %i died\n", time_stamp, n + 1);
+	pthread_mutex_unlock(&status->print);
 }
 
 bool	read_stop_simulation(t_status *status)
@@ -53,8 +52,8 @@ bool	read_stop_simulation(t_status *status)
 void	write_stop_simulation(int n, t_status *status)
 {
 	pthread_mutex_lock(&status->stop);
-	print_status(n, status, DEAD);
+	if (n != -1)
+		print_status(n, status, DEAD);
 	status->stop_simulation = true;
 	pthread_mutex_unlock(&status->stop);
 }
-
